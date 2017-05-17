@@ -78,7 +78,7 @@ void main(void)
     for(;;)
     {
     	/*
-    	CAN_0.BUF[0]: Light mode, 0 is on, 1 is off	
+		CAN_0.BUF[0]: Light mode, 0 is on, 1 is off	
 		CAN_0.BUF[1]: non_driven_wheels_speed
 		CAN_0.BUF[2]: alive message
 		CAN_0.BUF[3]: error message
@@ -175,6 +175,22 @@ void CANMB0003(void)
 
 void CANMB0407(void)
 {
+	 /********************************************************************
+    *                    _____  ___  ___   ___                          *
+    *                   |_   _|/ _ \|   \ / _ \                         *
+    *                     | | | (_) | |) | (_) |                        *
+    *                     |_|  \___/|___/ \___/                         *
+    *                                                                   *
+    * CAN reception is handled here                                     *
+    * The following buffers are important:                              *
+    * CAN_0.RXFIFO.ID.B.STD_ID: ID of received message                  *
+    * CAN_0.RXFIFO.DATA.B[i]: value of data byte 'i'                    *
+    * IMPORTANT: check for the flag in CAN_0.IFRL.B.BUF05I first!       *
+    ********************************************************************/  
+   
+    /* end of own code! */
+    /* clear flags as last step here! */
+    /* don't change anything below! */
 	if(CAN_0.IFRL.B.BUF05I) {
 		switch(CAN_0.RXFIFO.ID.B.STD_ID) {
 			case 0x101:
