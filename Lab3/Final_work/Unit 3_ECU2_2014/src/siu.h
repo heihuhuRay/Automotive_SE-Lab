@@ -1,1 +1,0 @@
-void SIUInit(void);
