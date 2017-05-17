@@ -24,10 +24,19 @@ int int_400_arrived = 0;
 
 int second_int = 0; 
 
-// initial value 00111111
-unsigned char light_states = 63;
-int light_value;
+// initial value 111111, 6 bits represent 64 states: 0~63
+// In manual mode the ECU receives 6 signals which represent different light states.
+unsigned char light_states = 64;
+
+// light_value: The message with ID 0x101 holds the light value.
+int light_value; // 10 bits
+
+// Check ECU3 for door_control
+// initial value = 1 just for testing
 int door_control_is_alive = 1;
+
+// non_driven_wheels_speed: value between 0 and 300
+int non_driven_wheels_speed;
 
 /********************************************************************
  *                              main                                *
@@ -47,48 +56,38 @@ void main(void)
     LED6 = 1;
     LED7 = 1; 
 
-	/* channel 0 and 1 of PIT timer are configured to interrupt every 100ms and 200ms respectively */
+/********************************************************************
+*                    _____  ___  ___   ___                          *
+*                   |_   _|/ _ \|   \ / _ \                         *
+*                     | | | (_) | |) | (_) |                        *
+*                     |_|  \___/|___/ \___/                         *
+*                                                                   *
+* Some configuration/initialisation must                            *
+* be done outside of the for-loop....(!)                            *
+********************************************************************/  
+
+/* channel 0 and 1 of PIT timer are configured to interrupt every 100ms and 200ms respectively */
 	PIT_ConfigureTimer(0, 100);
 	PIT_ConfigureTimer(1, 200);
 	
-	/* start PIT timer for channel 0 and 1 */
+/* start PIT timer for channel 0 and 1 */
 	PIT_StartTimer(0);
 	PIT_StartTimer(1);
-		
-	int non_driven_wheels_speed;
 
     /* forever */
     for(;;)
     {
-        if(int_100_arrived) {
-			/* send non driven wheels speed */
-			non_driven_wheels_speed = ADC_0.CDR[4].B.CDATA * 100 / 341; // mapping 0-300
-			CAN_0.BUF[1].DATA.B[0] = non_driven_wheels_speed;
-			CAN_0.BUF[1].DATA.B[1] =  non_driven_wheels_speed >> 8;		
-			CAN_0.BUF[1].CS.B.CODE = 12;
-			
-			int_100_arrived = 0;
-		} 
-		
-		if(int_200_arrived) {
-			// send alive message
-			CAN_0.BUF[2].CS.B.CODE = 12;
-			
-			// send error message
-			if(door_control_is_alive == 0) {
-				CAN_0.BUF[3].CS.B.CODE = 12;
-				LED7 = ~LED7;
-			} else {
-				door_control_is_alive = 0;
-				LED7 = 1;
-			}
-			
-			int_200_arrived = 0;
-		}
-		
-		if(int_400_arrived) {
+    	/*
+    	CAN_0.BUF[0]: Light mode, 0 is on, 1 is off	
+		CAN_0.BUF[1]: non_driven_wheels_speed
+		CAN_0.BUF[2]: alive message
+		CAN_0.BUF[3]: error message
+    	*/
+    	if(int_400_arrived) 
+		{
 			// when switch 1 is on - automatic mode
-			if(SW1 == 0) {
+			if(SW1 == 0) 
+			{
 				if(light_value < 512)
 					light_states &= 15; //00001111
 				else 
@@ -99,6 +98,43 @@ void main(void)
 			CAN_0.BUF[0].CS.B.CODE = 12;
 			
 			int_400_arrived = 0;
+		}
+
+		/* send non driven wheels speed */
+		/*Lab1_Subtask 2:
+		potentiometer ---------> "ADC_0.CDR[4].B.CDATA"
+		This subtask concerns with the usage of the potentiometer provided on the board. The converted
+		value from the potentiometer is being stored in the register “ADC_0.CDR[4].B.CDATA”. Use this data
+		register, instead of light sensor data register, with the same function (“showData( value )”).*/
+        if(int_100_arrived) 
+        {
+        	//????????????????????????????how to map to 0-300???????????????????
+			non_driven_wheels_speed = ADC_0.CDR[4].B.CDATA * 100 / 341; // mapping 0-300
+			CAN_0.BUF[1].DATA.B[0] = non_driven_wheels_speed;
+			CAN_0.BUF[1].DATA.B[1] =  non_driven_wheels_speed >> 8;		
+			CAN_0.BUF[1].CS.B.CODE = 12;// set as 12 for sending,  4 for receiving
+			
+			int_100_arrived = 0;
+		} 
+		
+		if(int_200_arrived)
+		{
+			// send alive message
+			CAN_0.BUF[2].CS.B.CODE = 12;
+			
+			// send error message
+			if(door_control_is_alive == 0) 
+			{
+				CAN_0.BUF[3].CS.B.CODE = 12;
+				LED7 = ~LED7;//light LED7 for warning
+			} 
+			else 
+			{
+				door_control_is_alive = 0;
+				LED7 = 1;
+			}
+			
+			int_200_arrived = 0;
 		}
     }
 }
