@@ -163,15 +163,6 @@ void PITCHANNEL1(void)
     PIT.CH[1].TFLG.B.TIF = 1;
 }
 
-void CANMB0003(void)
-{
-/* No modifications needed here */
-/* Receive interrupts are being cleared here */
-    CAN_0.IFRL.B.BUF00I = 1;
-    CAN_0.IFRL.B.BUF01I = 1;
-    CAN_0.IFRL.B.BUF02I = 1;
-    CAN_0.IFRL.B.BUF03I = 1;
-}
 
 void CANMB0407(void)
 {
@@ -187,10 +178,6 @@ void CANMB0407(void)
     * CAN_0.RXFIFO.DATA.B[i]: value of data byte 'i'                    *
     * IMPORTANT: check for the flag in CAN_0.IFRL.B.BUF05I first!       *
     ********************************************************************/  
-   
-    /* end of own code! */
-    /* clear flags as last step here! */
-    /* don't change anything below! */
 	if(CAN_0.IFRL.B.BUF05I) {
 		switch(CAN_0.RXFIFO.ID.B.STD_ID) {
 			case 0x101:
@@ -218,6 +205,24 @@ void CANMB0407(void)
     CAN_0.IFRL.B.BUF05I = 1;
     CAN_0.IFRL.B.BUF06I = 1;
     CAN_0.IFRL.B.BUF07I = 1;
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+/* No modifications needed  below */
+void CANMB0003(void)
+{
+/* No modifications needed here */
+/* Receive interrupts are being cleared here */
+    CAN_0.IFRL.B.BUF00I = 1;
+    CAN_0.IFRL.B.BUF01I = 1;
+    CAN_0.IFRL.B.BUF02I = 1;
+    CAN_0.IFRL.B.BUF03I = 1;
 }
 
 void CANMB0811(void)

@@ -68,7 +68,9 @@ void CANMsgBufInit(void)
     CAN_0.BUF[3].CS.B.LENGTH = 0;
     /* STD_ID */
     CAN_0.BUF[3].ID.B.STD_ID = 0x304; /* error message id */
-    
+
+///////////////////////////////////////////////////////////////// 
+// Buffer 4,5 not used
     /* Buffer 4 */
     /* MB Code */
     CAN_0.BUF[4].CS.B.CODE = 8;
@@ -96,12 +98,14 @@ void CANMsgBufInit(void)
     CAN_0.BUF[5].CS.B.LENGTH = 2;
     /* STD_ID */
     CAN_0.BUF[5].ID.B.STD_ID = 0x306; /* Change to the correct ID! */
+///////////////////////////////////////////////////////////////////////
 
 /********************************************************************
  *                   CAN masking configuration                      *
  ********************************************************************/
-
+    // Acceptance register
     CAN_0.RXFIFO.IDTABLE[0].R = 0; //0x00000000
+    // Mask register
     CAN_0.RXIMR[0].R = 0; //0x17c7ffff
 }
 
