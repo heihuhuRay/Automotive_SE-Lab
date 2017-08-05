@@ -206,7 +206,7 @@ void showData(int value)
 void PITCHANNEL0() {
     /* clear flag */
     PIT.CH[0].TFLG.B.TIF = 1;
-	
+	// toggle: blink
 	// toggle LED7
 	SIU.GPDO[11].R = ~SIU.GPDO[11].R;
 /*	
